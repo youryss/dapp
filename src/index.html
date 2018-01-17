@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Loja Decentralizada</title>
+</head>
+<body>
+    <h1 id="store-title">Loja Decentralizada</h1>
+        <h2 id="product-id"></h2>
+        <label for="prod-id">id do produto</label>
+        <input id="prod-id" name="prod-id"/>
+        <label for="prod-name">Nome do produto</label>
+        <input id="prod-name" name="prod-name"/>
+        <button id="save">Salvar</button>
+        
+    <script src="../node_modules/web3/dist/web3.min.js"></script>
+    <script>
+        const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
+        web3.eth.defaultAccount = web3.eth.accounts[0];
+        const StoreContract = web3.eth.contract([
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "getProduct",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "string"
+                    },
+                    {
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": false,
+                "inputs": [
+                    {
+                        "name": "_prodName",
+                        "type": "string"
+                    },
+                    {
+                        "name": "_id",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "setProduct",
+                "outputs": [],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
+            }
+        ]);
+
+        const Store = StoreContract.at('0x1faeef6c7ed9327fab882d4311134affc3f83201');
+        console.log(Store);
+
+        // Essa função é responsável por retornar o último registro do nosso
+        // blockchain
+        let getProd = () => { 
+            Store.getProduct((error, result) => {
+                if(!error) {
+                    document.querySelector('#product-id').innerHTML = `${result[1]}`;
+                } else {
+                    console.log(error);
+                }
+            });
+        };
+
+        // Esse é o submit do nosso formulário para o blockchain
+        document.querySelector('#save').addEventListener('click', () => {
+            const prodName = document.querySelector('#prod-name').value;
+            const prodId = document.querySelector('#prod-id').value;
+            getProd();
+            Store.setProduct(prodName, prodId);
+        });
+        
+        getProd();
+    </script>
+</body>
+</html>
